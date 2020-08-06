@@ -490,6 +490,8 @@ enum Decoration {
   DecorationHlslSemanticGOOGLE = 5635,
   DecorationUserSemantic = 5635,
   DecorationUserTypeGOOGLE = 5636,
+  DecorationFunctionRoundingModeINTEL = 5822,
+  DecorationFunctionDenormModeINTEL = 5823,
   DecorationRegisterINTEL = 5825,
   DecorationMemoryINTEL = 5826,
   DecorationNumbanksINTEL = 5827,
@@ -508,6 +510,7 @@ enum Decoration {
   DecorationPrefetchINTEL = 5902,
   DecorationBufferLocationINTEL = 5921,
   DecorationIOPipeStorageINTEL = 5944,
+  DecorationFunctionFloatingPointModeINTEL = 6080, 
   DecorationMax = 0x7fffffff,
 };
 
@@ -953,6 +956,7 @@ enum Capability {
   CapabilitySubgroupAvcMotionEstimationChromaINTEL = 5698,
   CapabilityRoundToInfinityINTEL = 5582,
   CapabilityFloatingPointModeINTEL = 5583,
+  CapabilityFunctionFloatControlINTEL = 5821,
   CapabilityFPGAMemoryAttributesINTEL = 5824,
   CapabilityArbitraryPrecisionIntegersINTEL = 5844,
   CapabilityArbitraryPrecisionFloatingPointINTEL = 5845,
