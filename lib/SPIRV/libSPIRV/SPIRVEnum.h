@@ -402,11 +402,11 @@ template <> inline void SPIRVMap<Decoration, SPIRVCapVec>::init() {
   ADD_VEC_INIT(DecorationPrefetchINTEL, {CapabilityFPGAMemoryAccessesINTEL});
   ADD_VEC_INIT(DecorationBufferLocationINTEL,
                {CapabilityFPGABufferLocationINTEL});
-  ADD_VEC_INIT(DecorationFunctionRouningModeINTEL, 
+  ADD_VEC_INIT(DecorationFunctionRoundingModeINTEL, 
                {CapabilityFunctionFloatControlINTEL});
   ADD_VEC_INIT(DecorationFunctionDenormModeINTEL, 
                {CapabilityFunctionFloatControlINTEL});
-  ADD_VEC_INIT(DecorationFunctionFloatingPointINTEL, 
+  ADD_VEC_INIT(DecorationFunctionFloatingPointModeINTEL, 
                {CapabilityFunctionFloatControlINTEL});
 }
 
