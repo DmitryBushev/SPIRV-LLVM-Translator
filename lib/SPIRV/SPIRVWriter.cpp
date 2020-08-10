@@ -589,6 +589,29 @@ void LLVMToSPIRV::transVectorComputeMetadata(Function *F) {
   auto BF = static_cast<SPIRVFunction *>(getTranslatedValue(F));
   assert(BF && "The SPIRVFunction pointer shouldn't be nullptr");
   auto Attrs = F->getAttributes();
+  
+  if (BM->isAllowedToUseExtension(ExtensionID::SPV_INTEL_float_controls2) 
+      &&  Attrs.hasFnAttribute(kVCMetadata::VCFloatControl))  {
+    
+    /*NOTE: now in order to use float control I have to 
+            enable both SPV_INTEL_float_controls2 and
+            SPV_INTEL_vector_compute extensions, because
+            the last provides kVCMetadata::VCFloatControl
+            utilities
+    */
+    
+      SPIRVWord Mode = 0; //float control data goes here
+      Attrs
+          .getAttribute(AttributeList::FunctionIndex,
+                        kVCMetadata::VCFloatControl)
+          .getValueAsString()
+          .getAsInteger(0, Mode);
+
+//TODO: add decorate with Float Control information in 
+
+//    BF->addDecorate(**put decoration here**);
+      
+   }
 
   if (Attrs.hasFnAttribute(kVCMetadata::VCStackCall))
     BF->addDecorate(DecorationStackCallINTEL);

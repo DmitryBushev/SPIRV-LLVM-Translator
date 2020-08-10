@@ -324,6 +324,7 @@ protected:
   void validate() const override {
     SPIRVEntry::validate();
     CompType->validate();
+#if 0
 #ifndef NDEBUG
     if (!(Module->isAllowedToUseExtension(
             ExtensionID::SPV_INTEL_vector_compute))) {
@@ -331,6 +332,7 @@ protected:
              CompCount == 8 || CompCount == 16);
     }
 #endif // !NDEBUG
+#endif
   }
 
 private:
