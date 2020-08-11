@@ -2658,6 +2658,7 @@ Function *SPIRVToLLVM::transFunction(SPIRVFunction *BF) {
 
   if (BF->hasDecorate(DecorationReferencedIndirectlyINTEL))
     F->addFnAttr("referenced-indirectly");
+  
 
   if (!F->isIntrinsic()) {
     F->setCallingConv(IsKernel ? CallingConv::SPIR_KERNEL
@@ -3749,30 +3750,66 @@ bool SPIRVToLLVM::transVectorComputeMetadata(SPIRVFunction *BF) {
   unsigned FloatControl = 0;
   // RoundMode and FloatMode are always same for all types in Cm
   // While Denorm could be different for double, float and half
-  VCRoundModeExecModeMap::foreach ([&](VCRoundMode VCRM, ExecutionMode EM) {
-    if (BF->getExecutionMode(EM)) {
+  if(isKernel(BF)){
+    VCRoundModeExecModeMap::foreach ([&](VCRoundMode VCRM, ExecutionMode EM) {
+      if (BF->getExecutionMode(EM)) {
+        IsVCFloatControl = true;
+        FloatControl |= getVCFloatControl(VCRM);
+      }
+    });
+    VCFloatModeExecModeMap::foreach ([&](VCFloatMode VCFM, ExecutionMode EM) {
+      if (BF->getExecutionMode(EM)) {
+        IsVCFloatControl = true;
+        FloatControl |= getVCFloatControl(VCFM);
+      }
+    });
+    VCDenormModeExecModeMap::foreach ([&](VCDenormMode VCDM, ExecutionMode EM) {
+      auto ExecModes = BF->getExecutionModeRange(EM);
+      for (auto It = ExecModes.first; It != ExecModes.second; It++) {
+        IsVCFloatControl = true;
+        unsigned TargetWidth = (*It).second->getLiterals()[0];
+        VCFloatType FloatType = VCFloatTypeSizeMap::rmap(TargetWidth);
+        FloatControl |= getVCFloatControl(VCDM, FloatType);
+      }
+    });
+  }
+  else  {
+    if(BF->hasDecorate(DecorationFunctionRoundingModeINTEL))  {
+      std::set<SPIRVWord> roundModes = BF->getDecorate(DecorationFunctionRoundingModeINTEL, 1);
+
+      assert(roundModes.size() == roundModes.count(*roundModes.begin()) && "Rounding Mode must be equal within all targets");
+
       IsVCFloatControl = true;
-      FloatControl |= getVCFloatControl(VCRM);
+      FloatControl |= getVCFloatControl(static_cast<VCRoundMode>(*roundModes.begin()));
     }
-  });
-  VCFloatModeExecModeMap::foreach ([&](VCFloatMode VCFM, ExecutionMode EM) {
-    if (BF->getExecutionMode(EM)) {
+    
+    if(BF->hasDecorate(DecorationFunctionDenormModeINTEL))  {
+      std::set<SPIRVWord> targetWidthes = BF->getDecorate(DecorationFunctionDenormModeINTEL, 0);
+      std::set<SPIRVWord> denormModes = BF->getDecorate(DecorationFunctionDenormModeINTEL, 1);
       IsVCFloatControl = true;
-      FloatControl |= getVCFloatControl(VCFM);
+        
+      assert(denormModes.size() == targetWidthes.size());
+      
+      for(auto WI = targetWidthes.begin(), MI = denormModes.begin(); WI != targetWidthes.end(); ++WI, ++MI){
+        VCFloatType ftype = VCFloatTypeSizeMap::rmap(*WI);
+        FloatControl |= getVCFloatControl(static_cast<VCDenormMode>(*MI), ftype);
+      }
     }
-  });
-  VCDenormModeExecModeMap::foreach ([&](VCDenormMode VCDM, ExecutionMode EM) {
-    auto ExecModes = BF->getExecutionModeRange(EM);
-    for (auto It = ExecModes.first; It != ExecModes.second; It++) {
-      IsVCFloatControl = true;
-      unsigned TargetWidth = (*It).second->getLiterals()[0];
-      VCFloatType FloatType = VCFloatTypeSizeMap::rmap(TargetWidth);
-      FloatControl |= getVCFloatControl(VCDM, FloatType);
+    
+    if(BF->hasDecorate(DecorationFunctionFloatingPointModeINTEL))  {
+      std::set<SPIRVWord> floatModes = BF->getDecorate(DecorationFunctionFloatingPointModeINTEL, 1);
+
+      assert(floatModes.size() == floatModes.count(*floatModes.begin()) && "Floating Point Mode must be equal within all targets");
+
+      IsVCFloatControl = true;      
+      FloatControl |= getVCFloatControl(static_cast<VCFloatMode>(*floatModes.begin()));
     }
-  });
+    
+  }
+  
   if (IsVCFloatControl) {
     Attribute Attr = Attribute::get(*Context, kVCMetadata::VCFloatControl,
-                                    std::to_string(FloatControl));
+                                      std::to_string(FloatControl));
     F->addAttribute(AttributeList::FunctionIndex, Attr);
   }
 

@@ -166,6 +166,10 @@ public:
       return getSet(ExtensionID::SPV_INTEL_io_pipes);
     case DecorationBufferLocationINTEL:
       return getSet(ExtensionID::SPV_INTEL_fpga_buffer_location);
+    case DecorationFunctionFloatingPointModeINTEL:
+    case DecorationFunctionRoundingModeINTEL:
+    case DecorationFunctionDenormModeINTEL:
+      return getSet(ExtensionID::SPV_INTEL_float_controls2);
     default:
       return SPIRVExtSet();
     }
@@ -542,6 +546,19 @@ public:
       : SPIRVMemberDecorate(DecorationBankBitsINTEL, MemberNumber, TheTarget) {
     Literals = TheBits;
     WordCount += Literals.size();
+  }
+};
+
+template<Decoration D>
+class SPIRVDecorateFunctionFloatControls : public SPIRVDecorate {
+public:
+  // Complete constructor for SPIRVDecorateFunctionFloatControls
+  SPIRVDecorateFunctionFloatControls(SPIRVEntry *TheTarget, 
+                                     SPIRVWord TargetWidth,
+                                     SPIRVWord FloatControl)
+      :SPIRVDecorate(D, TheTarget, TargetWidth) {
+    Literals.push_back(FloatControl);
+    WordCount++;
   }
 };
 
