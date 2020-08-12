@@ -3775,34 +3775,49 @@ bool SPIRVToLLVM::transVectorComputeMetadata(SPIRVFunction *BF) {
   }
   else  {
     if(BF->hasDecorate(DecorationFunctionRoundingModeINTEL))  {
-      std::set<SPIRVWord> roundModes = BF->getDecorate(DecorationFunctionRoundingModeINTEL, 1);
-
-      assert(roundModes.size() == roundModes.count(*roundModes.begin()) && "Rounding Mode must be equal within all targets");
+      std::vector<SPIRVDecorate const *> roundModes = BF->getDecorations(
+                                                DecorationFunctionRoundingModeINTEL);
+      
+      assert(roundModes.size() == 3 && "Function must have precisely 3 "\
+      "FunctionRoundingModeINTEL decoration");
+      
+      bool validate = roundModes[0]->getLiteral(1) == roundModes[1]->getLiteral(1) &&
+                      roundModes[0]->getLiteral(1) == roundModes[2]->getLiteral(1);
+                      
+      assert(validate && "Rounding Mode must be equal within all targets");
 
       IsVCFloatControl = true;
-      FloatControl |= getVCFloatControl(static_cast<VCRoundMode>(*roundModes.begin()));
+      FloatControl |= getVCFloatControl(static_cast<VCRoundMode>(roundModes[0]->getLiteral(1)));
     }
     
     if(BF->hasDecorate(DecorationFunctionDenormModeINTEL))  {
-      std::set<SPIRVWord> targetWidthes = BF->getDecorate(DecorationFunctionDenormModeINTEL, 0);
-      std::set<SPIRVWord> denormModes = BF->getDecorate(DecorationFunctionDenormModeINTEL, 1);
+      std::vector<SPIRVDecorate const *> denormModes = BF->getDecorations(
+                                                 DecorationFunctionDenormModeINTEL);
       IsVCFloatControl = true;
-        
-      assert(denormModes.size() == targetWidthes.size());
       
-      for(auto WI = targetWidthes.begin(), MI = denormModes.begin(); WI != targetWidthes.end(); ++WI, ++MI){
-        VCFloatType ftype = VCFloatTypeSizeMap::rmap(*WI);
-        FloatControl |= getVCFloatControl(static_cast<VCDenormMode>(*MI), ftype);
+      assert(denormModes.size() == 3 && "Function must have precisely 3 "\
+      "FunctionDenormModeINTEL decoration");
+      
+      for(auto decPtr: denormModes){
+        VCFloatType ftype = VCFloatTypeSizeMap::rmap(decPtr->getLiteral(0));
+        FloatControl |= getVCFloatControl(static_cast<VCDenormMode>(decPtr->getLiteral(1)), ftype);
       }
     }
     
     if(BF->hasDecorate(DecorationFunctionFloatingPointModeINTEL))  {
-      std::set<SPIRVWord> floatModes = BF->getDecorate(DecorationFunctionFloatingPointModeINTEL, 1);
+      std::vector<SPIRVDecorate const *> floatModes = BF->getDecorations(
+                                                DecorationFunctionFloatingPointModeINTEL);
 
-      assert(floatModes.size() == floatModes.count(*floatModes.begin()) && "Floating Point Mode must be equal within all targets");
+      assert(floatModes.size() == 3 && "Function must have precisely 3 "\
+      "FunctionFloatingPointModeINTEL decoration");
+      
+      bool validate = floatModes[0]->getLiteral(1) == floatModes[1]->getLiteral(1) &&
+                      floatModes[0]->getLiteral(1) == floatModes[2]->getLiteral(1);
+                      
+      assert(validate && "Floating point Mode must be equal within all targets");
 
       IsVCFloatControl = true;      
-      FloatControl |= getVCFloatControl(static_cast<VCFloatMode>(*floatModes.begin()));
+      FloatControl |= getVCFloatControl(static_cast<VCFloatMode>(floatModes[0]->getLiteral(1)));
     }
     
   }
