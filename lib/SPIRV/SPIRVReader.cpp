@@ -3778,8 +3778,8 @@ bool SPIRVToLLVM::transVectorComputeMetadata(SPIRVFunction *BF) {
       std::vector<SPIRVDecorate const *> roundModes = BF->getDecorations(
                                                 DecorationFunctionRoundingModeINTEL);
       
-      assert(roundModes.size() == 3 && "Function must have precisely 3 "\
-      "FunctionRoundingModeINTEL decoration");
+      assert(roundModes.size() == 3 &&
+             "Function must have precisely 3 FunctionRoundingModeINTEL decoration");
       
       bool validate = roundModes[0]->getLiteral(1) == roundModes[1]->getLiteral(1) &&
                       roundModes[0]->getLiteral(1) == roundModes[2]->getLiteral(1);
@@ -3795,12 +3795,13 @@ bool SPIRVToLLVM::transVectorComputeMetadata(SPIRVFunction *BF) {
                                                  DecorationFunctionDenormModeINTEL);
       IsVCFloatControl = true;
       
-      assert(denormModes.size() == 3 && "Function must have precisely 3 "\
-      "FunctionDenormModeINTEL decoration");
+      assert(denormModes.size() == 3 &&
+             "Function must have precisely 3 FunctionDenormModeINTEL decoration");
       
       for(auto decPtr: denormModes){
         VCFloatType ftype = VCFloatTypeSizeMap::rmap(decPtr->getLiteral(0));
-        FloatControl |= getVCFloatControl(static_cast<VCDenormMode>(decPtr->getLiteral(1)), ftype);
+        FloatControl |= getVCFloatControl(static_cast<VCDenormMode>(decPtr->getLiteral(1)), 
+                                          ftype);
       }
     }
     
@@ -3808,8 +3809,8 @@ bool SPIRVToLLVM::transVectorComputeMetadata(SPIRVFunction *BF) {
       std::vector<SPIRVDecorate const *> floatModes = BF->getDecorations(
                                                 DecorationFunctionFloatingPointModeINTEL);
 
-      assert(floatModes.size() == 3 && "Function must have precisely 3 "\
-      "FunctionFloatingPointModeINTEL decoration");
+      assert(floatModes.size() == 3 &&
+             "Function must have precisely 3 FunctionFloatingPointModeINTEL decoration");
       
       bool validate = floatModes[0]->getLiteral(1) == floatModes[1]->getLiteral(1) &&
                       floatModes[0]->getLiteral(1) == floatModes[2]->getLiteral(1);
