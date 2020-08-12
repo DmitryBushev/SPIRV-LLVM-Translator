@@ -591,18 +591,24 @@ SPIRVFunction *LLVMToSPIRV::transFunctionDecl(Function *F) {
             BF->addDecorate(
               new SPIRVDecorateFunctionFloatControls<
                     DecorationFunctionDenormModeINTEL>(
-                    BF, TargetWidth, static_cast<SPIRVWord>(
+                      BF, 
+                      TargetWidth, 
+                      static_cast<SPIRVWord>(
                             getVCDenormPreserve(Mode, FloatType))));
                     
             BF->addDecorate(
               new SPIRVDecorateFunctionFloatControls<
                     DecorationFunctionRoundingModeINTEL>(
-                    BF, TargetWidth, static_cast<SPIRVWord>(getVCRoundMode(Mode))));
+                      BF, 
+                      TargetWidth, 
+                      static_cast<SPIRVWord>(getVCRoundMode(Mode))));
                     
              BF->addDecorate(
               new SPIRVDecorateFunctionFloatControls<
                     DecorationFunctionFloatingPointModeINTEL>(
-                    BF, TargetWidth, static_cast<SPIRVWord>(getVCFloatMode(Mode))));
+                      BF, 
+                      TargetWidth, 
+                      static_cast<SPIRVWord>(getVCFloatMode(Mode))));
         });
 
       

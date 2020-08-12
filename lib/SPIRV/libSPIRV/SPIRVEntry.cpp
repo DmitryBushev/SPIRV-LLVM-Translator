@@ -389,7 +389,8 @@ std::set<SPIRVWord> SPIRVEntry::getDecorate(Decoration Kind,
 }
 
 // Get all decorations of Kind
-std::vector<SPIRVDecorate const *> SPIRVEntry::getDecorations(Decoration Kind) const{
+std::vector<SPIRVDecorate const *> SPIRVEntry::getDecorations(Decoration Kind)
+                                                                       const { 
   auto Range = Decorates.equal_range(Kind);
   std::vector<SPIRVDecorate const *> Decors;
   for (auto I = Range.first, E = Range.second; I != E; ++I) {
